@@ -177,6 +177,78 @@ class MainWindow(QMainWindow):
         QMessageBox.question(self, 'About', "emmmmmmmmmmm", QMessageBox.Ok,
                              QMessageBox.Ok)
 
+class MainWindowDirectLoad(QMainWindow):
+    def __init__(self):
+        #self.add_hello_context_menu()
+        super(MainWindowDirectLoad, self).__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.desktopPath = path = os.path.expanduser("~/Desktop")
+
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('About')
+        aboutAct = QAction('Things about us', self)
+        fileMenu.addAction(aboutAct)
+        aboutAct.triggered.connect(self.showAbout)
+        self.statusBar()
+
+        # Create a widget for tool dock
+        # Add some of widgets to listLayout
+        listLayout = QVBoxLayout()
+        listLayout.setContentsMargins(0, 0, 0, 0)
+
+        # Create and add a widget for showing current label items
+        self.labelList = QListWidget()
+        labelListContainer = QWidget()
+        labelListContainer.setLayout(listLayout)
+        listLayout.addWidget(self.labelList)
+
+        self.dock = QDockWidget(u'工具', self)
+        self.dock.setObjectName(u'Labels')
+        self.dock.setWidget(labelListContainer)
+
+        # create the labelList widget here
+        self.labelList = myFileList(self)
+        self.populate(self.labelList)
+
+        self.fileListWidget = myFileList(self)
+        self.populate(self.fileListWidget)
+        filelistLayout = QVBoxLayout()
+        filelistLayout.setContentsMargins(0, 0, 0, 0)
+        filelistLayout.addWidget(self.fileListWidget)
+        fileListContainer = QWidget()
+        fileListContainer.setLayout(filelistLayout)
+        self.filedock = QDockWidget(u'图片列表', self)
+        self.filedock.setObjectName(u'Files')
+        self.filedock.setWidget(fileListContainer)
+
+        self.setCentralWidget(self.labelList)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.dock)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.filedock)
+        self.dockFeatures = QDockWidget.DockWidgetClosable \
+                            | QDockWidget.DockWidgetFloatable
+        self.dock.setFeatures(self.dock.features() ^ self.dockFeatures)
+        self.filedock.setFeatures(self.filedock.features() ^ self.dockFeatures)
+
+        self.setGeometry(400, 200, 950, 600)
+        self.setWindowTitle('Desktop Backup')
+        self.statusBar().showMessage("Program started.")
+
+        self.show()
+
+    def populate(self, fileList):
+        for file in os.listdir(self.desktopPath):
+            print(file)
+            myQListWidgetItem = QListWidgetItem(fileList)
+            myQListWidgetItem.setText(file)
+            fileList.addItem(myQListWidgetItem)
+
+    def showAbout(self):
+        self.statusBar().showMessage("About us!!!")
+        QMessageBox.question(self, 'About', "emmmmmmmmmmm", QMessageBox.Ok,
+                             QMessageBox.Ok)
+
 class Preview(QWidget):
     def __init__(self):
         super(QWidget, self).__init__()
@@ -207,6 +279,9 @@ class Preview(QWidget):
 
         self.show()
 
+
+
+
     @pyqtSlot()
     def on_click(self):
         self.setVisible(False)
@@ -225,10 +300,11 @@ class Preview(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    path = ""
-    path = open("config.txt", "r+").read()
-    if path is not "":
-        ex = MainWindow()
-    else:
-        ex = Preview()
+    # path = ""
+    # path = open("config.txt", "r+").read()
+    # if path is not "":
+    #     ex = MainWindow()
+    # else:
+    #     ex = Preview()
+    ex = MainWindowDirectLoad()
     sys.exit(app.exec_())
